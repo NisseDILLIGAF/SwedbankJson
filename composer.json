@@ -1,9 +1,8 @@
 {
     "name": "walle89/swedbank-json",
-    "description": "Wrapper for Swedbank's closed mobile apps API in Sweden",
+    "description": " Unofficial API client for the Swedbank's and Sparbanken's mobile apps in Sweden.",
     "type": "library",
     "keywords": ["swedbank","wrapper","api","json"],
-    "version": "0.5.1",
     "minimum-stability": "stable",
     "license": "MIT",
     "homepage": "https://github.com/walle89/SwedbankJson",
@@ -18,10 +17,16 @@
         "source": "https://github.com/walle89/SwedbankJson"
     },
     "require": {
-        "php": ">=5.4",
+        "php": ">=5.5",
         "ext-curl": "*",
-        "rhumsaa/uuid": "~2.7",
-        "guzzlehttp/guzzle": "~5.0"
+        "ext-json": "*",
+        "ramsey/uuid": "^3.0.0",
+        "guzzlehttp/guzzle": "^6.2.1"
+    },
+    "require-dev": {
+        "rtheunissen/guzzle-log-middleware": "^0.4.0",
+        "monolog/monolog": "^1.17",
+        "cogpowered/finediff": "0.3.*"
     },
     "autoload": {
         "psr-4": {

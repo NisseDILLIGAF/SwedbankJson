@@ -1,6 +1,11 @@
 .idea
-tests/
 exmaple.php
-composer.phar
+composer.*
+!composer.json
 vendor/
 .DS_Store
+
+### Local Vagrant dev ###
+tests/
+*agrant*
+ansible*

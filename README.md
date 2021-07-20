@@ -1,194 +1,77 @@
 # SwedbankJson
 
-Inofficiell wrapper för det API som används för Swedbanks och Sparbankernas mobilappar. Inlogging görs med hjälp av internetbankens personliga kod (person- eller organisationsnummer och lösenord) eller med säkerhetsdosa.
+Unofficial API client for the Swedbank's and Sparbanken's mobile apps in Sweden.
 
-**Detta kan wrappen göra**
+* Overview of your bank accounts, loans, debit and credit cards.
+* List account transactions
+* Transfer money between accounts
+* Sign in with different profiles, ideal for Swedbank Företag app users.
+* Activate, deactivate, and view quick balance (aka. snabbsaldo)
 
-* Översikt av tillgängliga konton så som lönekonto, sparkonton investeringsbesparningar, lån, bankkort och kreditkort.
-* Lista ett kontos samtliga transaktioner med historik så långt bak i tiden som finns tillgängligt i internetbanken.
-* Företagsinloggingar kan välja att lista konton utifrån en vald profil.
-* Inlogging via personlig kod eller säkerhetsdosa.
-* Aktivera, avaktivera och visa snabbsaldo.
-* Kommunicerar med Swedbanks servrar över SSL utan mellanhänder. Ingenting sparas eller loggas.
-* Autentiseringsnyckel som krävs för inlogging genereras automatiskt per session (standard) eller manuellt sätta en statisk nykel.
+**Authentication methods**
 
-[Fler funktioner finns planerade](https://github.com/walle89/SwedbankJson/labels/todo).
+* Mobile BankID
+* Security token with one time code
+* No authentication (used for some functionality eg. quick balance)
 
-## Kodexempel
+Traffic between Swedbank's servers and the API client uses the same TLS encryption that Swedbank apps are using and without middlemen.
 
-### Grund (Personlig kod)
-Grundkoden för exemplen nedan:
+## Installation and documentation
+
+* [Introduction and installation](INSTALL.md)
+* [Authentication methods](docs/authentication.md)
+* [Reference](docs/reference.md)
+
+## Code example
+List bank statements with authentication method [security token with one time code](docs/authentication.md#security-token-with-one-time-code).
+
 ```php
-require_once 'vendor/autoload.php';
-
-// Inställningar
-define('BANK_APP',  'swedbank');     // Byt mot motsvarande IOS/Android mobil app. Alternativ: swedbank, sparbanken, swedbank_foretag, sparbanken_foretag, swedbank_ung, sparbanken_ung
-define('USERNAME',  198903060000);   // Person- eller organisationsnummer
-define('PASSWORD',  'fakePW');       // Personlig kod
-
-$auth = new SwedbankJson\Auth\PersonalCode(BANK_APP, USERNAME, PASSWORD);
+$auth     = new SwedbankJson\Auth\SecurityToken($bankApp, $username, $challengeResponse);
 $bankConn = new SwedbankJson\SwedbankJson($auth);
-```
-Men vill man använda en annan inloggigstyp än personlig kod behöver man modifera ovanstånde kod till ett av förjande:
 
-#### Säkerhetsdosa (Engångskod)
-Det finns två typer av varianter för inlogging med säkerhetsdosa. Ett av dessa är engångskod, som ger ett 8-siffrig kod när man har låst upp dosan och väljer 1 när "Appli" visas.
+$accountInfo = $bankConn->accountDetails();
+$bankConn->terminate(); // Sign out
 
-Utgår man från inlogginsflöde i mobilappen ser den ut som följande:
-
-**Välj säkerhetsdosa -> Fyll i engångskod från säkerhetsdosan -> Inloggad**
-
-```php
-$auth = new SwedbankJson\Auth\SecurityToken(BANK_APP, USERNAME, $challengeResponse);
-```
-**$challengeResponse** ska vara ett 8-siffrigt nummer som man får från säkerhetsdosan
-
-#### Säkerhetsdosa (Kontrollnummer och svarskod)
-Den andra typen av inlogginsmetod för säkerhetsdosa är kontrollnummer med svarskod. Denna metod innebär att man får en 8-siffrigt kontrollnummer som ska matas in i dosan och som svar får man ett nytt 8-siffrigt svarskod som skrivs in i antingen appen eller i internetbanken.
-
-Utgår man från inlogginsflöde i mobilappen ser den ut som följande:
-
-**Välj säkerhetsdosa -> Mata in kontrollnummer i dosan -> Skriv av savarskod -> Inloggad**
-
-I dagsläget finns det inget stöd för denna typ av inlogging, men den finns på todo-listan. Den som kan tänka sig att ställa upp som testare kan läsa mer om det [här](https://github.com/walle89/SwedbankJson/issues/18#issuecomment-77850071).
-
-### Kontotransaktioner
-Lista kontotransaktioner från första kontot.
-```php
-$accountInfo = $bankConn->accountDetails(); // Hämtar från första kontot, sannolikt lönekontot
-
-$bankConn->terminate(); // Utlogging
-
-echo '<strong>Kontoutdrag</strong>';
+echo 'Bank statements
+<pre>';
 print_r($accountInfo);
 ```
 
-### Välja konto
-För att lista och välja ett specifikt konto som man hämtar sina transaktioner kan man modifiera ovanstående kod till följande:
-```php
-$accounts = $bankConn->accountList(); // Lista på tillgängliga konton
-
-$accountInfo = $bankConn->accountDetails($accounts->transactionAccounts[1]->id); // För konto #2 (gissningsvis något sparkonto)
-
-$bankConn->terminate(); // Utlogging
-
-echo '<strong>Konton</strong>';
-print_r($accounts);
-
-echo '<strong>Kontoutdrag</strong>';
-print_r($accountInfo);
-```
-
-### Profilväljare (företag)
-I Swedbanks API finns det stöd för att ha flera företagsprofiler kopplat till sin inlogging. Glöm inte att ändra BANK_APP till an av Swedbanks företagsappar.
-```PHP
-$profiles = $bankConn->profileList(); // Profiler
-
-$accounts = $bankConn->accountList($profiles->corporateProfiles[0]->id); // Tillgängliga konton utifrån vald profil
-
-$accountInfo = $bankConn->accountDetails($accounts->transactionAccounts[0]->id);
-
-$bankConn->terminate(); // Utlogging
-
-echo '<strong>Profiler</strong>';
-print_r($profiles);
-
-echo '<strong>Konton</strong>';
-print_r($profiles);
-
-echo '<strong>Kontoutdrag</strong>';
-print_r($accountInfo);
-```
-
-## Systemkrav
-
-* PHP 5.4+
-* Curl
-
-## Installation
-Idag erbjuds enbart installation via [Composer](http://getcomposer.org). Det är möjligt att ladda ned projektfilterna och manuelt installera stödbibliotek, men det är inget som rekommenderas.
-
-### Linux och OS X
-
-Kör följande i ett terminalfönster (OS X: Öppna Applikationer > Verktygsprogram > Terminal):
-```bash
-curl -sS https://getcomposer.org/installer | php
-```
-
-Lägg in SwebankJson i composer.json antingen med följande kommando:
-```bash
-php composer.phar require walle89/swedbank-json ~0.5
-```
-
-***Eller*** skapa eller ändra composer.json med följande innehåll och kör "php composer.phar install":
-```javascript
-{
-    "require": {
-        "walle89/swedbank-json": "~0.5"
-    }
-}
-```
-
-Efter lyckad installation, ladda in autoload.php i vendor mappen.
+All APIs does not require to sign in. One example is quick balance.
 
 ```php
-require 'vendor/autoload.php';
+$auth     = new SwedbankJson\Auth\UnAuth($bankApp);
+$bankConn = new SwedbankJson\SwedbankJson($auth);
+
+$quickBalance = $bankConn->quickBalance($subID);
+
+echo 'Quick balance
+<pre>';
+print_r($quickBalance);
 ```
 
-### Windows
+## FAQ
 
-Se till att php.exe finns installerat och den fulla sökvägen till den (ex. C:\php\php.exe).
+### Can I install it without Composer?
+No, it's either recommended or supported. It's much easier to use Composer than manually download all the dependencies. [Read more about installing with Composer](docs/composer.md).
 
-Kör sedan [Compoer-Setup.exe](https://getcomposer.org/doc/00-intro.md#using-the-installer) och följ instruktionerna samt se till att "Shell menus" installeras.
+### I'm not a Swedbank customer in Sweden, can I use this library?
+No, Swedbank's API is unique for the Swedish market and is not compatible with eg. Swedbank Denmark or Swedbank Lithuania.
 
-Högerklicka på en katalog och välj "Use Composer here". Ett cmd.exe-fönster ska öppnas och kör då detta kommando:
-```winbatch
-composer require walle89/swedbank-json ~0.5
-```
+### Why is this library not using the Swedbank Open Banking API?
+Swedbank Open Banking API (and Open Banking in general) is in many aspects a fantastic initiative. Now we have an open documented standard for how a third party can fetch bank statements and initiate payment transactions on behalf of a customer. Unlike this library, Swedbank Open Banking API is supported by the bank.
 
-***Eller*** skapa eller ändra composer.json med följande innehåll samt högerklicka och välj "Composer Install":
-```javascript
-{
-    "require": {
-        "walle89/swedbank-json": "~0.5"
-    }
-}
-```
+However there are few reasons for why I have chose to not to use the Open Banking API. One of them is it's costly and time consuming to get the required AISP or PISP licence from a local financial supervisory authority such as [Finansinspektionen](https://www.fi.se/sv/bank/andra-betaltjanstdirektivet-psd-2/) (Swedish) in order to get access to real customer data (production access).
 
-Efter lyckad installation, ladda in autoload.php i vendor mappen.
-```php
-require 'vendor/autoload.php';
-```
+This library is instead using Swedbank's Mobile Apps API, the same API that's used for the Swedish Swedbank apps or Sparbanken apps for Android and Ios. There is no need for a AISP or PISP license. If you can use any of Swedbank's or Sparbanken's apps, then you can start coding using this library. Also Mobile Apps API have endpoints such as QuickBalance that's not exist in the Open Banking API.
 
-## Dokumentation
+## Support and Feedback
+This project utilize Github Issues for both support and feedback. Before creating a new issue, please do the following:
 
-Finns i form av PHPDoc kommentarer i filerna. Utförligare dokumentation med API-anrop finns på [todo-listan](https://github.com/walle89/SwedbankJson/wiki/Todo).
+1. Check the documentation (see links under [Installation and documentation](#installation-and-documentation)).
+1. [Search in issues](https://github.com/walle89/SwedbankJson/issues).
 
-## Uppdateringar
+If you didn't find your answer, you are welcome to [create a new issue](https://github.com/walle89/SwedbankJson/issues).
 
-Främsta anledningen till uppdateringar behöver göras är att Swedbank ändrar AppID och User Agent för varje uppdatering av sina appar. AppID och User Agent används som en del av atuetensierings prosessen.
-
-### Linux och OS X
-Kör följande kommando:
-```bash
-php composer.phar update
-```
-
-### Windows
-Högerklicka på den katalog som innehåller composer.json, högerklicka och välj "Composter update".
-
-## Feedback, frågor, buggar, etc.
-
-Skapa en [Github Issue](https://github.com/walle89/SwedbankJson/issues), men var god kontrollera att det inte finns någon annan som skapat en likande issue (sökfunktinen är din vän).
-
-## Andra projekt med Swedbanks API
-* [SwedbankSharp](https://github.com/DarkTwisterr/SwedbankSharp) av [DarkTwisterr](https://github.com/DarkTwisterr) - C# med .NET implementation.
-* [Swedbank-Cli](https://github.com/spaam/swedbank-cli) av [Spaam](https://github.com/spaam) - Swedbank i terminalen. Skriven i Python.
-* [SwedbankJson](https://github.com/viktorgardart/SwedbankJson) av [Viktor Gardart](https://github.com/viktorgardart) - Objective-C implementation (för iOS).
-
-## Licens (MIT)
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+## License
+[MIT](LICENSE)

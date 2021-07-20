@@ -1,127 +1,126 @@
 <?php
-/**
- * Wrapper för Swedbanks stänga API för mobilappar
- *
- * @package SwedbankJSON
- * @author  Eric Wallmander
- *          Date: 2014-02-25
- *          Time: 21:36
- */
-
 namespace SwedbankJson\Auth;
 
-use SwedbankJson\AppData;
 use Exception;
+use SwedbankJson\AppData;
+use SwedbankJson\Exception\UserException;
 
+/**
+ * Class SecurityToken
+ * @package SwedbankJson\Auth
+ */
 class SecurityToken extends AbstractAuth
 {
-
-    /**
-     * @var int Inlogging personnummer
-     */
+    /** @var string Username. Personal identity number or corporate identity number (personnummer/organisationsnummer) */
     private $_username;
 
-    /**
-     * @var int
-     */
+    /** @var string One time code or response code */
     private $_challengeResponse;
 
-    /**
-     * @var int
-     */
-    private $_challenge=null;
+    /** @var string Control number */
+    private $_challenge;
 
-    /**
-     * @var bool
-     */
+    /** @var bool Security token type. */
     private $_useOneTimePassword;
 
     /**
-     * Grundläggande upgifter
+     * SecurityToken constructor.
      *
-     * @param string|array $bankApp     ID för vilken bank som ska anropas, eller array med appdata uppgifter.
-     * @param int $username             Personnummer för inlogging till internetbanken
-     * @param int $challengeResponse    Personlig kod för inlogging till internetbanken
-     * @param bool $debug               Sätt true för att göra felsökning, annars false eller null
-     * @param string $ckfile            Sökväg till mapp där cookiejar kan sparas temporärt
+     * @param string|array $bankApp           Bank type AppID
+     * @param string       $username          Personal identity number or corporate identity number (personnummer/organisationsnummer)
+     * @param int          $challengeResponse One time code or response code from security token
+     * @param bool         $debug             Enable debugging
      *
-     * @throws \Exception
-     * @throws \SwedbankJson\UserException
+     * @throws Exception
      */
-    public function __construct($bankApp, $username, $challengeResponse = 0, $debug = false, $ckfile = './temp/')
+    public function __construct($bankApp, $username, $challengeResponse = 0, $debug = false)
     {
         $this->setAppData((!is_array($bankApp)) ? AppData::bankAppId($bankApp) : $bankApp);
         $this->_username = $username;
-        $this->setchallengeResponse($challengeResponse);
+        $this->setChallengeResponse($challengeResponse);
         $this->_debug = (bool)$debug;
-        $this->_ckfile = tempnam($ckfile, 'CURLCOOKIE');
         $this->setAuthorizationKey();
     }
 
     /**
-     * @return object
+     * Fetch control number
+     *
+     * For security token with control number and response code.
+     *
+     * @return string|null Control number. Null if the security token only requires a generated one time code.
      * @throws Exception
      */
-    public function getchallenge()
+    public function getChallenge()
     {
-        if(empty($this->_challange))
+        if (empty($this->_challenge))
         {
-            $data_string = json_encode(['useEasyLogin' => false, 'generateEasyLoginId' => false, 'userId' => $this->_username,]);
-            $output = $this->postRequest('identification/securitytoken/challenge', $data_string);
+            $output = $this->postRequest(
+                'identification/securitytoken/challenge',
+                [
+                    'useEasyLogin'        => false,
+                    'generateEasyLoginId' => false,
+                    'userId'              => $this->_username,
+                ]
+            );
 
             if (!isset($output->links->next->uri))
-                throw new Exception('Inlogging misslyckades. Kontrollera användarnamn och authorization-nyckel.', 10);
+                throw new Exception('Cannot fetch control number. Check if the username is correct.', 10);
 
-            $this->_challenge           = (int)$output->challenge;
-            $this->_useOneTimePassword  = (bool)$output->useOneTimePassword;
+            $this->_challenge          = $output->challenge;
+            $this->_useOneTimePassword = (bool)$output->useOneTimePassword;
         }
 
         return $this->_challenge;
     }
 
     /**
-     * Inlogging
-     * Loggar in med personummer och personig kod för att få reda på bankID och den tillfälliga profil-id:t
+     * Sign in
      *
-     * @param int $challengeResponse
-     * @return bool
+     * It is a good idea to check security token type before sign in with getChallenge() and isUseOneTimePassword().
+     *
+     * @param string $challengeResponse One time code or response code from security token
+     *
+     * @return bool      True on successful sign in
      * @throws Exception
      */
-    public function login($challengeResponse = 0)
+    public function login($challengeResponse = '')
     {
-        if(!empty($challengeResponse))
-            $this->setchallengeResponse($challengeResponse);
+        if (!empty($challengeResponse))
+            $this->setChallengeResponse($challengeResponse);
 
-        if(is_null($this->_challenge))
-            $this->getchallenge();
+        if (is_null($this->_challenge))
+            $this->getChallenge();
 
-        if(empty($this->_challengeResponse))
-            throw new UserException('Säkerhetsdosans kod saknas, vänligen sätt den innan inlogging.',11);
+        if (empty($this->_challengeResponse))
+            throw new UserException('One time code or response code from security token is missing.', 11);
 
-        $data_string = json_encode(['response' => (string)$this->_challengeResponse,]);
-        $output = $this->postRequest('identification/securitytoken', $data_string);
+        $output = $this->postRequest('identification/securitytoken', ['response' => (string)$this->_challengeResponse,]);
 
-        if(!isset($output->links->next->uri))
+        if (!isset($output->links->next->uri))
         {
-            $code       = ($this->isUseOneTimePassword()) ? 'engångslösenord' : 'responskod';
-            $errorCode  = ($this->isUseOneTimePassword()) ? 12 : 13;
+            $code      = ($this->isUseOneTimePassword()) ? 'one time code' : 'response code';
+            $errorCode = ($this->isUseOneTimePassword()) ? 12 : 13;
 
-            throw new Exception(sprintf('Kan ej logga in! Beror troligen på ogiltig eller föråldrad %s.',$code), $errorCode);
+            throw new Exception(sprintf('Cannot sign in. Probably due to invalid or too old %s.', $code), $errorCode);
         }
 
         return true;
     }
 
     /**
-     * @param int $challengeResponse
+     * Set one time code or response code
+     *
+     * @param string $challengeResponse One time code or response code from security token.
      */
-    public function setchallengeResponse($challengeResponse)
+    public function setChallengeResponse($challengeResponse)
     {
-        $this->_challengeResponse = (int)$challengeResponse;
+        $this->_challengeResponse = $challengeResponse;
     }
 
     /**
-     * @return boolean
+     * Security token type
+     *
+     * @return bool True for one time code, else control number and response code security token
      */
     public function isUseOneTimePassword()
     {

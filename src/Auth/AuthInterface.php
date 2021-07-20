@@ -1,15 +1,16 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: walle
- * Date: 15-02-28
- * Time: 20:19
- */
-
 namespace SwedbankJson\Auth;
 
-
+/**
+ * Interface AuthInterface
+ * @package SwedbankJson\Auth
+ */
 interface AuthInterface
 {
+    /**
+     * Sign in
+     *
+     * @return bool True for successful sign in
+     */
     public function login();
 }

@@ -1,102 +1,214 @@
-#0.5.1 / 2015-03-09
+# Change Log
+All notable changes to this project will be documented in this file.
 
-### Övrigt
- * Uppdateringar av Guzzle
+## [Unreleased][unreleased]
 
-#0.5.0 / 2015-03-09
+## [0.7.6] - 2020-01-23
+### Fixed
+- Updated app version for all Swedbank apps in order to support the new minimal required version to use the API.
 
-### Nyheter
-* Stöd för inlogging för bankdosa med engångslösenord (se README.md)
+## [0.7.5] - 2019-12-09
+### Fixed
+- Updated app version for all Swedbank apps in order to support the new minimal required version to use the API.
 
-### Ändringar
-* Med anledning av stödjet av bankdosa har skapadet av SwedbankJson objektet gjots om. Se README.md.
-* Förenklad och snyggare att sätta AppID som är bakåtkompatibel med den tidigare metoden.
+## [0.7.4] - 2019-10-24
+### Fixed
+- Updated app version for all Swedbank apps (expect youth apps) in order to support the new minimal required version to use the API.
 
-### Uppdateringar
-* Uppdatering av appversion för samtliga Swedbank-appar.
-* Uppdaterad dokumentation med guide för Windowsanvändare.
+## [0.7.3] - 2019-10-07
+### Fixed
+- Updated app version for all Swedbank apps in order to support the new minimal required version to use the API.
 
-#0.4.0 / 2015-02-13
+## [0.7.2] - 2019-05-26
+### Fixed
+- Updated app version for all Swedbank apps in order to support the new minimal required version to use the API.
+- Stop endless looping when logout API call fails. Resulting in a Fatal error: Allowed memory message.
 
-### Nyheter
-* Snabbsaldo - Visa, aktivera och avaktivera snabbsaldo
-* Reminders - Hämta antalet avvisade betalningar, osignerade betalningar, osignerade överförningar och inkommna e-fakturor
-* Baseinfo - Lista på konton grupperade på typ
- 
-### Ändringar
-* AccountDetails kräver inte längre AccoutID. Om AccoutID inte är anget så används första kontot.
-* ProfilID inte längre nödvändig att ange i flertal anrop. Om ProfilID inte är anget så används första profilen.
- 
-### Uppdateringar
-* Uppdatering av appversion för samtliga Swedbank-appar.
-* Uppdaterad dokumentation
+## [0.7.1] - 2016-10-22
+### Changed
+- Updated app version for all Swedbank apps.
+- Updated UUID dependency.
 
-### Övrigt
- * Uppdateringar av bereonden av UDID och Guzzle
- 
-#0.3.4 / 2014-06-18
+## [0.7.0] - 2016-07-25
+### Security
+- Guzzle set to minimum version of 6.2.1 because of HTTP_PROXY vulnerability.
 
-#### Nyheter
-* Stöd för Sparbanken Företag
+### Added
+- Transfer money between accounts.
+- Option to log HTTP requests to file for debugging purposes.
 
-#### Ändringar
-* BankID "swedbank_företag" har bytt namn till "swedbank_foretag"
-* Uppdaterad appversion för Swedbank och Sparbanken
-* Uppdaterad dokumenation
+### Changed
+- Translated the documentation to English.
+- Improved documentation. Now with API response samples.
+- Updated app version for all Swedbank apps.
+- Refactor getchallenge() to getChallenge(). Method names are case-insensitive, should have no effect.
+- Refactor setchallengeResponse() to setChallengeResponse(). Method names are case-insensitive, should have no effect.
 
-#### Övrigt
-* Testad med Guzzle 4.1 och fungerar
+### Deprecated
+- Refactor of confirmTransfer() to confirmTransfers().
 
-#0.3.3 / 2014-05-28
+## [0.6.1] - 2016-02-07
+### Added
+- Documentation for quick balance.
 
-#### Ändringar
-* Fix för att radera cookie-fil efter kör förfrågan.
-* Småfix av dokumenation
-* MIT Lisens-fil tillagd
+### Fixed
+- Cleanup() didn't clean up saved session.
+- UserException namespace for Appdata.
+- Documentation links
 
-#### Övrigt
-* Testad med Guzzle 4.1 och fungerar
+## [0.6.0] - 2016-01-31
+### Added
+- New authentication method: Mobile BankID.
+- New authentication method: No login.
 
-#0.3.2 / 2014-05-15
-* Fix för #8. Linux skiljer mellan versaler och gemener på filnamn, vilket OSX inte gör.
+### Changed
+- Upgraded to Guzzle 6, therefore PHP 5.5 or later is required.
+- Updated app version for all Swedbank apps.
+- Improved error handling.
+- Improved documentation.
 
-#0.3.1 / 2014-05-15
-* Byte av namespaceing
-* Composer justeringar
-* Rättstavning
+### Removed
+- Automatic sign out - You have to manually use terminate() to sign out.
 
-#0.3.0 / 2014-05-15
-* Fixad så att den åter fungerar med Swedbanks API. Fixar issue #6.
-* Använder Guzzle 4 biblioteket, därmed krävs från och med nu PHP 5.4 eller senare.
-* Renare och bättre struktur
-* Uppdaterad Readme.md för tydligare instruktioner.
+## [0.5.2] - 2015-04-21
+### Changed
+- Update of Guzzle dependencies.
 
-#0.2.0 / 2014-05-14
-* Konverterad till Composer.
+### Fixed
+- Getchallenge() didn't save the challenge within a session. Issue [#22](https://github.com/walle89/SwedbankJson/issues/22).
 
-#0.1.0 / 2014-05-14
-* Utesluter temp-mapp och justering av tests-mappen
+## [0.5.1] - 2015-03-09
+### Changed
+- Update of Guzzle.
 
-#0.0.6 / 2014-05-04
-* Uppdaterad menyanrop
-* Väljer profil utifrån user-agent.
-* Anpassing till nya "Easy login"-funktionen samt felmeddealnde för byte av personlig kod.
-* Möjlighet att styra antal transaktioner som ska listas "per sida".
-* Buggfixar issue #4
+## [0.5.0] - 2015-03-09
+### Added
+- Support for authentication method Security token with one time code (see [README.md]).
 
-#0.0.5 / 2014-04-21
-* Stöd för sparbanker, företag, swedbank ung samt sparbank ung
-* Förbättrad dokumentation
+### Changed
+- The SwedbankJson object have been redesigned to support security token login. Read more about it in [README.md].
+- New way to set AppID. It's backward compatible with the old method.
+- Updated app version for all Swedbank apps.
+- Updated documentation with guide for Windows users.
 
-#0.0.4 / 2014-02-09
-* Förbättrad felhantering
+## [0.4.0] - 2015-02-13
+### Added
+- Quick balance - Show, activate and deactivate Quick balance.
+- Reminders - Get the number of rejected payments, payments signed, unsigned transfers and incoming e-invoices.
+- Baseinfo - Account list grouped by type.
 
-#0.0.3 / 2014-02-01
-* Investeringssparand
-* Bättre output av felmeddelanden
+### Changed
+- AccountDetails does not longer require AccountID. If no AccountID is provided, it will fallback to default account.
+- Setting ProfileID is no longer required. If ProfileID is not provided, it will fallback to default profile. 
+- Updated app version for all Swedbank apps.
+- Updated documentation.
+- Updated dependencies of UDID and Guzzle.
 
-#0.0.2 / 2013-03-24
-* Kompatibel med 3.2.0 API:et. Nya fast auth-nyckel måste genereras!
+## [0.3.4] - 2014-06-18
+### Added
+- Support for Sparbanken Företag.
 
-#0.0.1 / 2013-03-15
-* Första släppet
+### Changed
+- Updated app version for Swedbank and Sparbanken.
+- Updated documentation.
+
+### Deprecated
+- Bank type "swedbank_företag" have changed to "swedbank_foretag".
+
+## [0.3.3] - 2014-05-28
+### Added
+- MIT License file.
+
+### Changed
+- Improved documentation.
+- Updated to Guzzle 4.1.
+
+### Fixed
+- Removing cookie file after each run. 
+
+## [0.3.2] - 2014-05-15
+### Fixed
+- Issue [#8](https://github.com/walle89/SwedbankJson/issues/8). Linux uses a case sensitive file system, unlike OS X.
+
+## [0.3.1] - 2014-05-15
+### Changed
+- Changed namespace.
+- Composer adjustments.
+
+## [0.3.0] - 2014-05-15
+### Changed
+- Starting using of Guzzle 4 library, therefore updated system requirement of PHP 5.4 or later.
+- Cleaner and better structure.
+- Updated Readme.md documentation.
+
+### Fixed
+- Issue [#6](https://github.com/walle89/SwedbankJson/issues/6).
+
+## [0.2.0] - 2014-05-14
+### Changed
+- Converted to Composer.
+
+## 0.1.0 - 2014-05-14
+### Removed
+- Removing the temp folder and adjusting the tests folder.
+
+## 0.0.6 - 2014-05-04
+### Added
+- Adjustable row limit for bank statements.
+- Automatic profile selection by bank type.
+
+### Changed
+- Updated menu API requests.
+- Support for Swedbank's "Easy login" API.
+- Outputs error message for mandatory password change.
+
+### Fixed
+- Issue [#4](https://github.com/walle89/SwedbankJson/issues/4)
+
+## 0.0.5 - 2014-04-21
+### Added
+- Support for new Bank types; Sparbanken, Swedbank Företeg, Swedbank Ung and Sparbanken Ung.
+
+### Changed
+- Improved documentation.
+
+## 0.0.4 - 2014-02-09
+### Changed
+- Improved error handling.
+
+## 0.0.3 - 2014-02-01
+### Added
+- Support for investment savings accounts.
+
+### Changed
+- Better output of error messages.
+
+## 0.0.2 - 2013-03-24
+### Changed
+- Compatibility with API version 3.2.0.
+
+## 0.0.1 - 2013-03-15
+### Added
+- First release.
+
+[unreleased]: https://github.com/walle89/SwedbankJson/compare/v0.7.6...HEAD
+[0.7.6]: https://github.com/walle89/SwedbankJson/compare/v0.7.5...v0.7.6
+[0.7.5]: https://github.com/walle89/SwedbankJson/compare/v0.7.4...v0.7.5
+[0.7.4]: https://github.com/walle89/SwedbankJson/compare/v0.7.3...v0.7.4
+[0.7.3]: https://github.com/walle89/SwedbankJson/compare/v0.7.2...v0.7.3
+[0.7.2]: https://github.com/walle89/SwedbankJson/compare/v0.7.1...v0.7.2
+[0.7.1]: https://github.com/walle89/SwedbankJson/compare/v0.7.0...v0.7.1
+[0.7.0]: https://github.com/walle89/SwedbankJson/compare/v0.6.1...v0.7.0
+[0.6.1]: https://github.com/walle89/SwedbankJson/compare/v0.6.0...v0.6.1
+[0.6.0]: https://github.com/walle89/SwedbankJson/compare/v0.5.2...v0.6.0
+[0.5.2]: https://github.com/walle89/SwedbankJson/compare/v0.5.1...v0.5.2
+[0.5.1]: https://github.com/walle89/SwedbankJson/compare/v0.5.0...v0.5.1
+[0.5.0]: https://github.com/walle89/SwedbankJson/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/walle89/SwedbankJson/compare/v0.3.4...v0.4.0
+[0.3.4]: https://github.com/walle89/SwedbankJson/compare/v0.3.3...v0.3.4
+[0.3.3]: https://github.com/walle89/SwedbankJson/compare/v0.3.2...v0.3.3
+[0.3.2]: https://github.com/walle89/SwedbankJson/compare/v0.3.1...v0.3.2
+[0.3.1]: https://github.com/walle89/SwedbankJson/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/walle89/SwedbankJson/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/walle89/SwedbankJson/compare/v0.1.0...v0.2.0
+[README.md]: README.md
